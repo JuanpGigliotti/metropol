@@ -1,8 +1,8 @@
 import { Router } from "express";
-import userModel from "../models/user.model.js";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import {createHash, isValidPassword} from "../utils/util.js";
+import userModel from "../models/users.model.js";
 
 const router = Router();
 
@@ -56,6 +56,10 @@ router.post("/login", async (req, res) => {
             return res.status(401).send("wrong password");
         }
 
+        if(!isValidPassword(password, userFinded)) {
+            return res.status(401).send("Contraseña incorrecta"); 
+        }
+
         const token = jwt.sign({user: userFinded.user, rol: userFinded.rol}, "metropol", {expiresIn: "1h"});
 
         res.cookie("cookieToken", token, {
@@ -73,10 +77,9 @@ router.post("/login", async (req, res) => {
 
 //current strategy
 
-router.get ("/current", passport.authenticate("current",{session:false}) ,(req,res) =>{
-    res.render("home", {user: req.user.user});
+router.get("/current", passport.authenticate("jwt", { session: false }), (req, res) => {
+    res.render("home", { user: req.user.user });
 });
-
 //logout
 
 router.post ("/logout", (req, res) =>{

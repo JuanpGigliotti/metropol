@@ -3,8 +3,16 @@ import express from 'express';
 import handlebars from 'express-handlebars';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
+import initializePassport from './config/passport.config.js';
+import dotenv from "dotenv";
+import sessionRouter from './routes/sessions.router.js';
+import viewsRouter from './routes/views.router.js';
+
+
 //import de database
+dotenv.config();
 import "./database.js";
+
 //iniciamos el servidor con express
 const app = express();
 const Puerto = process.env.PORT;
@@ -20,19 +28,19 @@ app.use(cookieParser());
 app.use(express.static("./src/public"));
 
 //en passport
-initializePassport();
 app.use(passport.initialize());
+initializePassport();
+
+// Configuración del motor de vistas
+app.engine('handlebars', handlebars.engine());
+app.set('view engine', 'handlebars');
+app.set('views', './src/views');
+
 
 //rutas
 
-
-
-
-
-
-
-
-
+app.use("/", viewsRouter);
+app.use("/api/sessions", sessionRouter);
 
 //listen
 
